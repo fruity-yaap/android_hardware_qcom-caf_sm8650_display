@@ -1,0 +1,62 @@
+cc_library_shared {
+    name: "libsdmcore",
+    defaults: ["qtidisplay_defaults"],
+    sanitize: {
+        integer_overflow: true,
+    },
+    vendor: true,
+    header_libs: [
+        "display_headers",
+        "qti_kernel_headers",
+    ],
+    cflags: [
+        "-fno-operator-names",
+        "-Wno-format",
+        "-Wno-unused-parameter",
+        "-DLOG_TAG=\"SDM\"",
+    ] + select(soong_config_variable("qtidisplay", "legacy_pphwresourceinfo"), {
+        true: ["-DTARGET_EXCLUDE_DDR_INFO"],
+        default: [],
+    }) + select(soong_config_variable("qtidisplay", "sm8650_pxlw_vendor_namespace"), {
+        any @ value: [
+            "-DSUPPORTS_PXLW",
+        ],
+        default: [],
+    }) + select(soong_config_variable("qtidisplay", "sm8650_pxlw_hw_iris7"), {
+        "true": [
+            "-DSUPPORTS_PXLW_IRIS7",
+        ],
+        default: [],
+    }),
+    shared_libs: [
+        "libdl",
+        "libdisplaydebug",
+        "libsdmutils",
+        "libdrm",
+        "libdrmutils",
+        "libsdedrm",
+        "libsdmdal",
+    ] + select(soong_config_variable("qtidisplay", "sm8650_pxlw_vendor_namespace"), {
+        any @ value: [
+            "//" + value + ":libpwirisfeature",
+        ],
+        default: [],
+    }),
+
+    srcs: [
+        "core_interface.cpp",
+        "core_impl.cpp",
+        "display_base.cpp",
+        "display_builtin.cpp",
+        "display_pluggable.cpp",
+        "display_virtual.cpp",
+        "display_null.cpp",
+        "noise_plugin_intf_impl.cpp",
+        "comp_manager.cpp",
+        "strategy.cpp",
+        "resource_default.cpp",
+        "color_manager.cpp",
+        "hw_info_default.cpp",
+    ],
+
+}
